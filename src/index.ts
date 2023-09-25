@@ -5,17 +5,29 @@ import { getOctokit, context } from '@actions/github';
 export async function run() {
   try {
     const title = getInput('title') || '';
-    const titleRegexFlags = getInput('title-regex-flags') || '';
-    const titleRegex = new RegExp(title, titleRegexFlags);
+    const titleRegexFlags = getInput('title-regex-flags' || '');
     const body = getInput('body') || '';
     const bodyRegexFlags = getInput('body-regex-flags') || '';
-    const bodyRegex = new RegExp(body, bodyRegexFlags);
-    const issueType = getInput('issue-type') || '';
-    const issueNumber = getInput('issue-number') || '';
-    const isAutoClose = getInput('is-auto-close') || '';
-
     const octokit = getOctokit(getInput('github-token', { required: true }));
-    const result = await validateIssueTitleAndBody(issueType, parseInt(issueNumber), titleRegex, bodyRegex);
+
+    const issueType = getInput('issue-type') || 'issue';
+    const issueNumber = context.issue.number;
+    const isAutoClose = getInput('auto-close') || 'false';
+    isAutoClose === 'true' ? true : false;
+
+    let titleRegex: RegExp | string | null;
+    let bodyRegex: RegExp | string | null;
+    if (titleRegexFlags) {
+      titleRegex = new RegExp(title, titleRegexFlags);
+    } else {
+      titleRegex = title;
+    }
+    if (bodyRegexFlags) {
+      bodyRegex = new RegExp(body, bodyRegexFlags);
+    } else {
+      bodyRegex = body;
+    }
+    const result = await validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bodyRegex);
     if (result === true) {
       setOutput('result', 'true');
     } else {
@@ -25,7 +37,7 @@ export async function run() {
         await octokit.rest.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
-          issue_number: parseInt(issueNumber),
+          issue_number: issueNumber,
           body: `Issue #${issueNumber} is not valid: Reason: ${result}: auto closing issue...`,
         });
 
@@ -33,7 +45,7 @@ export async function run() {
         await octokit.rest.issues.update({
           owner: context.repo.owner,
           repo: context.repo.repo,
-          issue_number: parseInt(issueNumber),
+          issue_number: issueNumber,
           state: 'closed',
         });
       }
