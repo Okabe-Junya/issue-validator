@@ -9686,7 +9686,7 @@ async function validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bod
     if (!titleRegex && !bodyRegex) {
         return true;
     }
-    if (issueType === 'issue') {
+    if (issueType === 'issue' || issueType === 'both') {
         const { title, body } = await (0, utils_1.getIssueTitleAndBody)(issueNumber);
         if (titleRegex && !validate(titleRegex, title)) {
             return false;
@@ -9696,7 +9696,7 @@ async function validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bod
         }
         return true;
     }
-    if (issueType === 'pull_request') {
+    if (issueType === 'pull_request' || issueType === 'both') {
         const { title, body } = await (0, utils_1.getPullRequestTitleAndBody)(issueNumber);
         if (titleRegex && !validate(titleRegex, title)) {
             return false;
@@ -9917,22 +9917,32 @@ async function run() {
         const issueType = (0, core_1.getInput)('issue-type') || 'issue';
         const issueNumber = github_1.context.issue.number;
         const isAutoClose = (0, core_1.getInput)('auto-close') || 'false';
-        isAutoClose === 'true' ? true : false;
+        (0, core_1.debug)(`inputs: ${JSON.stringify({
+            title,
+            titleRegexFlags,
+            body,
+            bodyRegexFlags,
+            issueType,
+            issueNumber,
+            isAutoClose,
+        })}`);
         let titleRegex;
         let bodyRegex;
-        if (titleRegexFlags) {
-            titleRegex = new RegExp(title, titleRegexFlags);
+        if (titleRegexFlags === 'true') {
+            titleRegex = new RegExp(title);
         }
         else {
             titleRegex = title;
         }
-        if (bodyRegexFlags) {
-            bodyRegex = new RegExp(body, bodyRegexFlags);
+        if (bodyRegexFlags === 'true') {
+            bodyRegex = new RegExp(body);
         }
         else {
             bodyRegex = body;
         }
+        (0, core_1.debug)(`regex: ${JSON.stringify({ titleRegex, bodyRegex })}`);
         const result = await (0, validate_1.validateIssueTitleAndBody)(issueType, issueNumber, titleRegex, bodyRegex);
+        (0, core_1.debug)(`result: ${result}`);
         if (result === true) {
             (0, core_1.setOutput)('result', 'true');
         }
@@ -9944,7 +9954,7 @@ async function run() {
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     issue_number: issueNumber,
-                    body: `Issue #${issueNumber} is not valid: Reason: ${result}: auto closing issue...`,
+                    body: `Issue #${issueNumber} is not valid: ${result}`,
                 });
                 // Close issue
                 await octokit.rest.issues.update({
@@ -9954,7 +9964,9 @@ async function run() {
                     state: 'closed',
                 });
             }
-            (0, core_1.setOutput)('result', 'false');
+            else {
+                (0, core_1.warning)(`Issue #${issueNumber} is not valid. Reason: ${result}`);
+            }
         }
         /* eslint @typescript-eslint/no-explicit-any: 0,  @typescript-eslint/no-unsafe-argument: 0, @typescript-eslint/no-unsafe-member-access: 0, @typescript-eslint/no-floating-promises: 0 */
     }
