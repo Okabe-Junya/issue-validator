@@ -9,7 +9,7 @@ export async function validateIssueTitleAndBody(
   if (!titleRegex && !bodyRegex) {
     return true;
   }
-  if (issueType === 'issue') {
+  if (issueType === 'issue' || issueType === 'both') {
     const { title, body } = await getIssueTitleAndBody(issueNumber);
     if (titleRegex && !validate(titleRegex, title)) {
       return false;
@@ -19,7 +19,7 @@ export async function validateIssueTitleAndBody(
     }
     return true;
   }
-  if (issueType === 'pull_request') {
+  if (issueType === 'pull_request' || issueType === 'both') {
     const { title, body } = await getPullRequestTitleAndBody(issueNumber);
     if (titleRegex && !validate(titleRegex, title)) {
       return false;
