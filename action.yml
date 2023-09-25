@@ -24,6 +24,10 @@ inputs:
   github-token:
     description: 'token for github'
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+  issue-type:
+    description: 'validate for issue or pull request. if you want to validate pull request, you must set issue-type: "pull_request". Both issue and pull request are validated, if you set issue-type: "both". default is "issue"'
+    required: false
+    default: 'issue'
   is-auto-close:
     description: 'auto close issue if it does not meet the conditions'
     required: false
