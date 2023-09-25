@@ -14,11 +14,11 @@ inputs:
     required: false
     default: ''
   title-regex-flags:
-    description: 'regex flags for title'
+    description: 'regex flags for title. if you want to use regex, you must set title and title-regex-flags: "true"'
     required: false
     default: ''
   body-regex-flags:
-    description: 'regex flags for body'
+    description: 'regex flags for body. if you want to use regex, you must set body and body-regex-flags: "true"'
     required: false
     default: ''
   github-token:
