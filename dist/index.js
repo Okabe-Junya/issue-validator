@@ -9688,20 +9688,20 @@ async function validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bod
     }
     if (issueType === 'issue') {
         const { title, body } = await (0, utils_1.getIssueTitleAndBody)(issueNumber);
-        if (titleRegex && !titleRegex.test(title)) {
+        if (titleRegex && !validate(titleRegex, title)) {
             return false;
         }
-        if (bodyRegex && !bodyRegex.test(body)) {
+        if (bodyRegex && !validate(bodyRegex, body)) {
             return false;
         }
         return true;
     }
     if (issueType === 'pull_request') {
         const { title, body } = await (0, utils_1.getPullRequestTitleAndBody)(issueNumber);
-        if (titleRegex && !titleRegex.test(title)) {
+        if (titleRegex && !validate(titleRegex, title)) {
             return false;
         }
-        if (bodyRegex && !bodyRegex.test(body)) {
+        if (bodyRegex && !validate(bodyRegex, body)) {
             return false;
         }
         return true;
@@ -9709,6 +9709,15 @@ async function validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bod
     throw new Error(`Invalid issue type: ${issueType}`);
 }
 exports.validateIssueTitleAndBody = validateIssueTitleAndBody;
+function validate(match, str) {
+    if (!match) {
+        return true;
+    }
+    if (match instanceof RegExp) {
+        return match.test(str);
+    }
+    return str.includes(match);
+}
 
 
 /***/ }),
@@ -9901,16 +9910,29 @@ const github_1 = __nccwpck_require__(5438);
 async function run() {
     try {
         const title = (0, core_1.getInput)('title') || '';
-        const titleRegexFlags = (0, core_1.getInput)('title-regex-flags') || '';
-        const titleRegex = new RegExp(title, titleRegexFlags);
+        const titleRegexFlags = (0, core_1.getInput)('title-regex-flags' || 0);
         const body = (0, core_1.getInput)('body') || '';
         const bodyRegexFlags = (0, core_1.getInput)('body-regex-flags') || '';
-        const bodyRegex = new RegExp(body, bodyRegexFlags);
-        const issueType = (0, core_1.getInput)('issue-type') || '';
-        const issueNumber = (0, core_1.getInput)('issue-number') || '';
-        const isAutoClose = (0, core_1.getInput)('is-auto-close') || '';
         const octokit = (0, github_1.getOctokit)((0, core_1.getInput)('github-token', { required: true }));
-        const result = await (0, validate_1.validateIssueTitleAndBody)(issueType, parseInt(issueNumber), titleRegex, bodyRegex);
+        const issueType = (0, core_1.getInput)('issue-type') || 'issue';
+        const issueNumber = github_1.context.issue.number;
+        const isAutoClose = (0, core_1.getInput)('auto-close') || 'false';
+        isAutoClose === 'true' ? true : false;
+        let titleRegex;
+        let bodyRegex;
+        if (titleRegexFlags) {
+            titleRegex = new RegExp(title, titleRegexFlags);
+        }
+        else {
+            titleRegex = title;
+        }
+        if (bodyRegexFlags) {
+            bodyRegex = new RegExp(body, bodyRegexFlags);
+        }
+        else {
+            bodyRegex = body;
+        }
+        const result = await (0, validate_1.validateIssueTitleAndBody)(issueType, issueNumber, titleRegex, bodyRegex);
         if (result === true) {
             (0, core_1.setOutput)('result', 'true');
         }
@@ -9921,14 +9943,14 @@ async function run() {
                 await octokit.rest.issues.createComment({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
-                    issue_number: parseInt(issueNumber),
+                    issue_number: issueNumber,
                     body: `Issue #${issueNumber} is not valid: Reason: ${result}: auto closing issue...`,
                 });
                 // Close issue
                 await octokit.rest.issues.update({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
-                    issue_number: parseInt(issueNumber),
+                    issue_number: issueNumber,
                     state: 'closed',
                 });
             }
