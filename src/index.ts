@@ -17,13 +17,13 @@ export async function run() {
 
     let titleRegex: RegExp | string | null;
     let bodyRegex: RegExp | string | null;
-    if (titleRegexFlags) {
-      titleRegex = new RegExp(title, titleRegexFlags);
+    if (titleRegexFlags === 'true') {
+      titleRegex = new RegExp(title);
     } else {
       titleRegex = title;
     }
-    if (bodyRegexFlags) {
-      bodyRegex = new RegExp(body, bodyRegexFlags);
+    if (bodyRegexFlags === 'true') {
+      bodyRegex = new RegExp(body);
     } else {
       bodyRegex = body;
     }
