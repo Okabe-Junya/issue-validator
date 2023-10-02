@@ -8,10 +8,8 @@ on:
 
 jobs:
   label:
-    # "release: major", "release: minor", "release: patch", "release: none" のいずれかのラベルの付与を行わせる．いずれもついていない場合は，/release major のようにコメントすることで付与させるようにする．
     runs-on: ubuntu-latest
     steps:
-      # いずれかのラベルが付与されているのかを確認する．
       - name: check-label
         uses: actions/github-script@v3
         with:
