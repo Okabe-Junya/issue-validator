@@ -15,8 +15,28 @@ jobs:
       contents: write
       pull-requests: write
     runs-on: ubuntu-latest
+    # マージされたPRに "release: major", "release: minor", "release: patch" のいずれかのラベルが付いている場合にリリースドラフトを更新する
     steps:
+      - name: Check label
+        id: check_label
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = await github.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            const labelNames = labels.data.map(label => label.name);
+            const releaseTypes = ["release: major", "release: minor", "release: patch"];
+            const releaseType = labelNames.find(labelName => releaseTypes.includes(labelName));
+            return {
+              releaseType: releaseType
+            };
+
       - name: release drafter
+        if: ${{ steps.check_label.outputs.releaseType != null }}
         uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
