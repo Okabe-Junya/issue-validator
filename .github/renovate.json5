@@ -17,7 +17,7 @@
     "labels": ["security"]
   },
 
-  "assignees": [@Okabe-Junya],
+  "assignees": ["Okabe-Junya"],
 
   "labels": ["dependencies", "renovate", "bot"],
 
