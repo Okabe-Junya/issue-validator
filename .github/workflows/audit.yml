@@ -1,4 +1,4 @@
-name: validate
+name: audit
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  build:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,8 +22,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build
-        run: yarn build:dry-run
+      - name: Audit dependencies
+        run: yarn audit --groups dependencies --level moderate
 
-      - name: Audit
-        run: yarn audit
+      - name: Audit devDependencies
+        run: yarn audit --groups devDependencies --level moderate
