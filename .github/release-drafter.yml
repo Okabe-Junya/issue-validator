@@ -1,0 +1,10 @@
+version-resolver:
+  major:
+    labels:
+      - 'release: major'
+  minor:
+    labels:
+      - 'release: minor'
+  patch:
+    labels:
+      - 'release: patch'
