@@ -1,7 +1,15 @@
 {
   "name": "issue-validator",
-  "version": "0.1.0",
-  "main": "index.js",
+  "version": "0.2.5",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build -o dist src/index.ts --license licenses.txt",
+    "build:dry-run": "ncc build -o dist src/index.ts --license licenses.txt --no-cache",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "test": "jest",
+    "prettier": "prettier --write ."
+  },
   "repository": "https://github.com/Okabe-Junya/issue-validator",
   "author": "Junya Okabe <okabe.junya.qj@alumni.tsukuba.ac.jp>",
   "license": "MIT",
@@ -31,12 +39,5 @@
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
     "typescript-eslint": "^0.0.1-alpha.0"
-  },
-  "scripts": {
-    "build": "ncc build src/index.ts -o dist --license licenses.txt",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "test": "jest",
-    "prettier": "prettier --write ."
   }
 }

@@ -19,7 +19,7 @@
 
   "assignees": ["Okabe-Junya"],
 
-  "labels": ["dependencies", "renovate", "bot"],
+  "labels": ["dependencies", "renovate", "bot", "release: none"],
 
   "dependencyDashboard": true,
 
@@ -34,16 +34,15 @@
     },
     {
       "matchUpdateTypes": ["major"],
-      "addLabels": ["bump: major"]
+      "addLabels": ["chore: major"]
     },
     {
       "matchUpdateTypes": ["minor"],
-      "addLabels": ["bump: minor"]
+      "addLabels": ["chore: minor"]
     },
     {
       "matchUpdateTypes": ["patch"],
-      "addLabels": ["bump: patch"],
-      "automerge": true
+      "addLabels": ["chore: patch"]
     },
     {
       "commitMessageTopic": "Node.js",
