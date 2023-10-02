@@ -17,8 +17,6 @@
     "labels": ["security"]
   },
 
-  "assignees": ["Okabe-Junya"],
-
   "labels": ["dependencies", "renovate", "bot", "release: none"],
 
   "dependencyDashboard": true,
