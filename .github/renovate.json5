@@ -13,7 +13,13 @@
 
   "schedule": ["after 3am and before 9am every weekday"],
 
-  "labels": ["dependencies", "renovate"],
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  },
+
+  "assignees": [@Okabe-Junya],
+
+  "labels": ["dependencies", "renovate", "bot"],
 
   "dependencyDashboard": true,
 
