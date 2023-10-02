@@ -15,7 +15,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           retries: 1
-          result-encoding: string
           script: |
             const labels = ["release: major", "release: minor", "release: patch", "release: none"];
             const { data: issue_data } = await github.rest.issues.get({
