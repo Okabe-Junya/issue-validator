@@ -1,0 +1,42 @@
+name: check dist is up to date
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: rebuild
+        run: yarn build
+
+      - name: compare dist
+        run: |
+          if [ "$(git diff --ignore-space-at-eol ./dist | wc -l)" -gt "0" ]; then
+          echo "dist is not up to date"
+          git diff
+          exit 1
+          fi
+        id: diff
+
+      - name: upload artifact
+        if: ${{ steps.diff.outputs.exit_code == '1' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
