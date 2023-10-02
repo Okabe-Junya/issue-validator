@@ -58,5 +58,3 @@ exclude-contributors:
   - 'renovate[bot]'
   - 'dependabot'
   - 'dependabot[bot]'
-exclude-labels:
-  - 'release: none'
