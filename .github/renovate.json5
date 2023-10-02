@@ -19,7 +19,7 @@
 
   "assignees": [@Okabe-Junya],
 
-  "labels": ["dependencies", "renovate"],
+  "labels": ["dependencies", "renovate", "bot"],
 
   "dependencyDashboard": true,
 
