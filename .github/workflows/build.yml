@@ -1,26 +1,42 @@
-name: build-dryrun
+name: build and compare dist
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - validate
+    types:
+      - completed
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: checkout repo
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      - name: setup node
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '20'
 
-      - name: Install dependencies
+      - name: install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build
-        run: yarn build:dry-run
+      - name: rebuild
+        run: yarn build
+
+      - name: compare dist
+        run: |
+          if [ "$(git diff --ignore-space-at-eol ./dist | wc -l)" -gt "0" ]; then
+          echo "dist is not up to date"
+          git diff
+          exit 1
+          fi
+        id: diff
+
+      - name: upload artifact
+        if: ${{ steps.diff.outputs.exit_code == '1' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
