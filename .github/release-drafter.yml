@@ -32,6 +32,9 @@ categories:
     labels:
       - 'docs'
       - 'documentation'
+  - title: 'Other'
+    labels:
+      - '*'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
 version-resolver:
@@ -45,7 +48,15 @@ version-resolver:
     labels:
       - 'release: patch'
 template: |
-  ## Changes
+  ## What's Changed
 
   $CHANGES
 
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+exclude-contributors:
+  - 'renovate'
+  - 'renovate[bot]'
+  - 'dependabot'
+  - 'dependabot[bot]'
+exclude-labels:
+  - 'release: none'
