@@ -36,40 +36,41 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const comment = context.payload.comment.body;
-            if (comment.match(/\/release major/)) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: ["release: major"]
-              });
-            } else if (comment.match(/\/release minor/)) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: ["release: minor"]
-              });
-            } else if (comment.match(/\/release patch/)) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: ["release: patch"]
-              });
-            } else if (comment.match(/\/release none/)) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: ["release: none"]
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: "Please add a label to this issue. \n\n- `/release major` \n- `/release minor` \n- `/release patch` \n- `/release none`"
-              });
-            }
+            script: console.log(context)
+          # const comment = context.payload.comment.body;
+          # if (comment.match(/\/release major/)) {
+          #   await github.rest.issues.addLabels({
+          #     owner: context.repo.owner,
+          #     repo: context.repo.repo,
+          #     issue_number: context.issue.number,
+          #     labels: ["release: major"]
+          #   });
+          # } else if (comment.match(/\/release minor/)) {
+          #   await github.rest.issues.addLabels({
+          #     owner: context.repo.owner,
+          #     repo: context.repo.repo,
+          #     issue_number: context.issue.number,
+          #     labels: ["release: minor"]
+          #   });
+          # } else if (comment.match(/\/release patch/)) {
+          #   await github.rest.issues.addLabels({
+          #     owner: context.repo.owner,
+          #     repo: context.repo.repo,
+          #     issue_number: context.issue.number,
+          #     labels: ["release: patch"]
+          #   });
+          # } else if (comment.match(/\/release none/)) {
+          #   await github.rest.issues.addLabels({
+          #     owner: context.repo.owner,
+          #     repo: context.repo.repo,
+          #     issue_number: context.issue.number,
+          #     labels: ["release: none"]
+          #   });
+          # } else {
+          #   await github.rest.issues.createComment({
+          #     owner: context.repo.owner,
+          #     repo: context.repo.repo,
+          #     issue_number: context.issue.number,
+          #     body: "Please add a label to this issue. \n\n- `/release major` \n- `/release minor` \n- `/release patch` \n- `/release none`"
+          #   });
+          # }
