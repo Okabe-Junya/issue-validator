@@ -9916,7 +9916,7 @@ async function run() {
         const octokit = (0, github_1.getOctokit)((0, core_1.getInput)('github-token', { required: true }));
         const issueType = (0, core_1.getInput)('issue-type') || 'issue';
         const issueNumber = github_1.context.issue.number;
-        const isAutoClose = (0, core_1.getInput)('auto-close') || 'false';
+        const isAutoClose = (0, core_1.getInput)('is-auto-close') || 'false';
         (0, core_1.debug)(`inputs: ${JSON.stringify({
             title,
             titleRegexFlags,
@@ -9954,7 +9954,7 @@ async function run() {
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     issue_number: issueNumber,
-                    body: `Issue #${issueNumber} is not valid: ${result}`,
+                    body: `Issue #${issueNumber} is not valid`,
                 });
                 // Close issue
                 await octokit.rest.issues.update({
@@ -9965,7 +9965,14 @@ async function run() {
                 });
             }
             else {
-                (0, core_1.warning)(`Issue #${issueNumber} is not valid. Reason: ${result}`);
+                (0, core_1.warning)(`Issue #${issueNumber} is not valid.`);
+                // Add comment
+                await octokit.rest.issues.createComment({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issueNumber,
+                    body: `Issue #${issueNumber} is not valid`,
+                });
             }
         }
         /* eslint @typescript-eslint/no-explicit-any: 0,  @typescript-eslint/no-unsafe-argument: 0, @typescript-eslint/no-unsafe-member-access: 0, @typescript-eslint/no-floating-promises: 0 */

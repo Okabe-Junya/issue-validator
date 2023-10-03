@@ -13,7 +13,7 @@ export async function run() {
 
     const issueType = getInput('issue-type') || 'issue';
     const issueNumber = context.issue.number;
-    const isAutoClose = getInput('auto-close') || 'false';
+    const isAutoClose = getInput('is-auto-close') || 'false';
 
     debug(
       `inputs: ${JSON.stringify({
@@ -61,7 +61,7 @@ export async function run() {
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid: ${result}`,
+          body: `Issue #${issueNumber} is not valid`,
         });
 
         // Close issue
@@ -72,7 +72,14 @@ export async function run() {
           state: 'closed',
         });
       } else {
-        warning(`Issue #${issueNumber} is not valid. Reason: ${result}`);
+        warning(`Issue #${issueNumber} is not valid.`);
+        // Add comment
+        await octokit.rest.issues.createComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issueNumber,
+          body: `Issue #${issueNumber} is not valid`,
+        });
       }
     }
     /* eslint @typescript-eslint/no-explicit-any: 0,  @typescript-eslint/no-unsafe-argument: 0, @typescript-eslint/no-unsafe-member-access: 0, @typescript-eslint/no-floating-promises: 0 */

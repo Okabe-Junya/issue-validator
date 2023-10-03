@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,6 +14,8 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: setup node
         uses: actions/setup-node@v3
@@ -30,13 +33,17 @@ jobs:
           if [ "$(git diff --ignore-space-at-eol ./dist | wc -l)" -gt "0" ]; then
           echo "dist is not up to date"
           git diff
-          exit 1
+          echo "EXIT_CODE=1" >> $GITHUB_ENV
+          else
+          echo "EXIT_CODE=0" >> $GITHUB_ENV
           fi
         id: diff
 
-      - name: upload artifact
-        if: ${{ steps.diff.outputs.exit_code == '1' }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: dist
+      - name: commit dist if changed
+        if: env.EXIT_CODE == '1'
+        run: |
+          git config --global user.name "action-user"
+          git config --global user.email "action@github.com"
+          git add ./dist
+          git commit -m "chore: update dist"
+          git push
