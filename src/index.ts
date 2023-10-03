@@ -13,7 +13,7 @@ export async function run() {
 
     const issueType = getInput('issue-type') || 'issue';
     const issueNumber = context.issue.number;
-    const isAutoClose = getInput('auto-close') || 'false';
+    const isAutoClose = getInput('is-auto-close') || 'false';
 
     debug(
       `inputs: ${JSON.stringify({
