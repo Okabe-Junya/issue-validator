@@ -2,31 +2,27 @@ name: labeler bot
 
 on:
   pull_request:
-    types: [opened, edited]
-  issue_comment:
-    types: [created, edited]
+    types: [opened, edited, synchronize]
 
 jobs:
   label:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: check-label
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          retries: 1
           script: |
             const labels = ["release: major", "release: minor", "release: patch", "release: none"];
-            const issue = context.issue;
-            const issue_number = issue.number;
-            const owner = issue.owner;
-            const repo = issue.repo;
-            const { data: issue_data } = await github.issues.get({
-              owner: owner,
-              repo: repo,
-              issue_number: issue_number
+            const { data: pull_request_data } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
             });
-            const issue_labels = issue_data.labels.map(label => label.name);
-            const is_release_label = labels.some(label => issue_labels.includes(label));
+            const pull_request_labels = pull_request_data.labels.map(label => label.name);
+            const is_release_label = labels.some(label => pull_request_labels.includes(label));
             if (is_release_label) {
               core.setOutput("is_release_label", "true");
             } else {
@@ -34,49 +30,59 @@ jobs:
             }
 
       - name: add-label
-        if: steps.check-label.outputs.is_release_label == 'false'
+        if: "${{steps.check-label.outputs.is_release_label != 'true'}}"
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issue = context.issue;
-            const issue_number = issue.number;
-            const owner = issue.owner;
-            const repo = issue.repo;
-            const comment = context.payload.comment.body;
-            if (comment.match(/\/release major/)) {
-              await github.issues.addLabels({
-                owner: owner,
-                repo: repo,
-                issue_number: issue_number,
-                labels: ["release: major"]
-              });
-            } else if (comment.match(/\/release minor/)) {
-              await github.issues.addLabels({
-                owner: owner,
-                repo: repo,
-                issue_number: issue_number,
-                labels: ["release: minor"]
-              });
-            } else if (comment.match(/\/release patch/)) {
-              await github.issues.addLabels({
-                owner: owner,
-                repo: repo,
-                issue_number: issue_number,
-                labels: ["release: patch"]
-              });
-            } else if (comment.match(/\/release none/)) {
-              await github.issues.addLabels({
-                owner: owner,
-                repo: repo,
-                issue_number: issue_number,
-                labels: ["release: none"]
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            if (comments.data.length === 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: "This pull request is missing a release label. You can add one by commenting on this issue. \n\n- `/release major` \n- `/release minor` \n- `/release patch` \n- `/release none`"
               });
             } else {
-              await github.issues.createComment({
-                owner: owner,
-                repo: repo,
-                issue_number: issue_number,
-                body: "Please add a label to this issue. \n\n- `/release major` \n- `/release minor` \n- `/release patch` \n- `/release none`"
-              });
+              const comment = comments.data[comments.data.length - 1].body;
+              if (comment.match(/\/release major/)) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: ["release: major"]
+                });
+              } else if (comment.match(/\/release minor/)) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: ["release: minor"]
+                });
+              } else if (comment.match(/\/release patch/)) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: ["release: patch"]
+                });
+              } else if (comment.match(/\/release none/)) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: ["release: none"]
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: "Please add a label to this issue. \n\n- `/release major` \n- `/release minor` \n- `/release patch` \n- `/release none`"
+                });
+              }
             }
