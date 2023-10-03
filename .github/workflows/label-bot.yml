@@ -18,13 +18,13 @@ jobs:
           retries: 1
           script: |
             const labels = ["release: major", "release: minor", "release: patch", "release: none"];
-            const { data: issue_data } = await github.rest.issues.get({
-              issue_number: context.issue.number,
+            const { data: pull_request_data } = await github.rest.pulls.get({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              pull_number: context.issue.number
             });
-            const issue_labels = issue_data.labels.map(label => label.name);
-            const is_release_label = labels.some(label => issue_labels.includes(label));
+            const labels = pull_request_data.labels.map(label => label.name);
+            const is_release_label = labels.some(label => labels.includes(label));
             if (is_release_label) {
               core.setOutput("is_release_label", "true");
             } else {
