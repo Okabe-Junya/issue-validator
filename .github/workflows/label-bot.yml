@@ -4,11 +4,12 @@ on:
   pull_request:
     types: [opened, edited, synchronize]
   issue_comment:
-    types: [created, edited]
+    types: [created]
 
 jobs:
   label:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'issue_comment' }}
     steps:
       - name: check-label
         uses: actions/github-script@v6
@@ -46,7 +47,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: "Please add a label to this issue. \n\n- `/release major` \n- `/release minor` \n- `/release patch` \n- `/release none`"
+                body: "This pull request is missing a release label. You can add one by commenting on this issue. \n\n- `/release major` \n- `/release minor` \n- `/release patch` \n- `/release none`"
               });
             } else {
               const comment = comments.data[comments.data.length - 1].body;
