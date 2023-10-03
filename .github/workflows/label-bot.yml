@@ -23,8 +23,8 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-            const labels = pull_request_data.labels.map(label => label.name);
-            const is_release_label = labels.some(label => labels.includes(label));
+            const pull_request_labels = pull_request_data.labels.map(label => label.name);
+            const is_release_label = labels.some(label => pull_request_labels.includes(label));
             if (is_release_label) {
               core.setOutput("is_release_label", "true");
             } else {
