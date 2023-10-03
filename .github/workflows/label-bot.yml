@@ -3,13 +3,11 @@ name: labeler bot
 on:
   pull_request:
     types: [opened, edited, synchronize]
-  issue_comment:
-    types: [created]
 
 jobs:
   label:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' || github.event_name == 'issue_comment' }}
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: check-label
         uses: actions/github-script@v6
