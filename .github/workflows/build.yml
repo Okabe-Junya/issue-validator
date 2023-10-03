@@ -30,12 +30,12 @@ jobs:
           if [ "$(git diff --ignore-space-at-eol ./dist | wc -l)" -gt "0" ]; then
           echo "dist is not up to date"
           git diff
-          exit 1
+          status=1
           fi
         id: diff
 
       - name: upload artifact
-        if: ${{ steps.diff.outputs.exit_code == '1' }}
+        if: ${{ steps.diff.outputs.status == '1' }}
         uses: actions/upload-artifact@v3
         with:
           name: dist
