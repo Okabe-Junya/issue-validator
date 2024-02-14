@@ -6,21 +6,21 @@ branding:
   color: 'gray-dark'
 inputs:
   title:
-    description: 'title for issue'
+    description: 'title for the issue/pull request'
     required: false
     default: ''
   body:
-    description: 'body for issue'
+    description: 'body for the issue/pull request'
     required: false
     default: ''
   title-regex-flags:
     description: 'regex flags for title. if you want to use regex, you must set title and title-regex-flags: "true"'
     required: false
-    default: ''
+    default: 'false'
   body-regex-flags:
     description: 'regex flags for body. if you want to use regex, you must set body and body-regex-flags: "true"'
     required: false
-    default: ''
+    default: 'false'
   github-token:
     description: 'token for github'
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
@@ -30,6 +30,10 @@ inputs:
     default: 'issue'
   is-auto-close:
     description: 'auto close issue if it does not meet the conditions'
+    required: false
+    default: 'false'
+  is-match:
+    description: 'when you set "true", issue/pull request is warned/closed if it does not meet the conditions. when you set "false", issue/pull request is warned/closed if it meets the conditions'
     required: false
     default: 'false'
 outputs:

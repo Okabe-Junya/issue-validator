@@ -1,4 +1,4 @@
-import { getInput, setOutput, warning, setFailed, debug } from '@actions/core';
+import { getInput, getBooleanInput, setOutput, warning, setFailed, debug } from '@actions/core';
 
 import { validateIssueTitleAndBody } from './validate';
 import { getOctokit, context } from '@actions/github';
@@ -6,14 +6,15 @@ import { getOctokit, context } from '@actions/github';
 export async function run() {
   try {
     const title = getInput('title') || '';
-    const titleRegexFlags = getInput('title-regex-flags' || '');
+    const titleRegexFlags = getBooleanInput('title-regex-flags');
     const body = getInput('body') || '';
-    const bodyRegexFlags = getInput('body-regex-flags') || '';
+    const bodyRegexFlags = getBooleanInput('body-regex-flags');
     const octokit = getOctokit(getInput('github-token', { required: true }));
 
     const issueType = getInput('issue-type') || 'issue';
     const issueNumber = context.issue.number;
-    const isAutoClose = getInput('is-auto-close') || 'false';
+    const isAutoClose = getBooleanInput('is-auto-close');
+    const isMatch = getInput('is-match') || 'false';
 
     debug(
       `inputs: ${JSON.stringify({
@@ -29,12 +30,12 @@ export async function run() {
 
     let titleRegex: RegExp | string | null;
     let bodyRegex: RegExp | string | null;
-    if (titleRegexFlags === 'true') {
+    if (titleRegexFlags) {
       titleRegex = new RegExp(title);
     } else {
       titleRegex = title;
     }
-    if (bodyRegexFlags === 'true') {
+    if (bodyRegexFlags) {
       bodyRegex = new RegExp(body);
     } else {
       bodyRegex = body;
@@ -42,26 +43,29 @@ export async function run() {
 
     debug(`regex: ${JSON.stringify({ titleRegex, bodyRegex })}`);
 
-    const result = await validateIssueTitleAndBody(
-      issueType,
-      issueNumber,
-      titleRegex,
-      bodyRegex,
-    );
+    // Validate issue title and body
+    // true if match, false if not match
+    const isValid = await validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bodyRegex);
+
+    // result is false if issue/PR will be closed/warned, true if issue/PR is valid
+    let result = isValid;
+    if (isMatch === 'false') {
+      result = !isValid;
+    }
 
     debug(`result: ${result}`);
 
     if (result === true) {
       setOutput('result', 'true');
     } else {
-      if (isAutoClose === 'true') {
+      if (isAutoClose) {
         warning(`Issue #${issueNumber} is not valid. Auto closing issue...`);
         // Add comment
         await octokit.rest.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid`,
+          body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
         });
 
         // Close issue
@@ -78,7 +82,7 @@ export async function run() {
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid`,
+          body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
         });
       }
     }

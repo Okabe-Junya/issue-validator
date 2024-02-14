@@ -30101,13 +30101,14 @@ const github_1 = __nccwpck_require__(5438);
 async function run() {
     try {
         const title = (0, core_1.getInput)('title') || '';
-        const titleRegexFlags = (0, core_1.getInput)('title-regex-flags' || 0);
+        const titleRegexFlags = (0, core_1.getBooleanInput)('title-regex-flags');
         const body = (0, core_1.getInput)('body') || '';
-        const bodyRegexFlags = (0, core_1.getInput)('body-regex-flags') || '';
+        const bodyRegexFlags = (0, core_1.getBooleanInput)('body-regex-flags');
         const octokit = (0, github_1.getOctokit)((0, core_1.getInput)('github-token', { required: true }));
         const issueType = (0, core_1.getInput)('issue-type') || 'issue';
         const issueNumber = github_1.context.issue.number;
-        const isAutoClose = (0, core_1.getInput)('is-auto-close') || 'false';
+        const isAutoClose = (0, core_1.getBooleanInput)('is-auto-close');
+        const isMatch = (0, core_1.getInput)('is-match') || 'false';
         (0, core_1.debug)(`inputs: ${JSON.stringify({
             title,
             titleRegexFlags,
@@ -30119,33 +30120,40 @@ async function run() {
         })}`);
         let titleRegex;
         let bodyRegex;
-        if (titleRegexFlags === 'true') {
+        if (titleRegexFlags) {
             titleRegex = new RegExp(title);
         }
         else {
             titleRegex = title;
         }
-        if (bodyRegexFlags === 'true') {
+        if (bodyRegexFlags) {
             bodyRegex = new RegExp(body);
         }
         else {
             bodyRegex = body;
         }
         (0, core_1.debug)(`regex: ${JSON.stringify({ titleRegex, bodyRegex })}`);
-        const result = await (0, validate_1.validateIssueTitleAndBody)(issueType, issueNumber, titleRegex, bodyRegex);
+        // Validate issue title and body
+        // true if match, false if not match
+        const isValid = await (0, validate_1.validateIssueTitleAndBody)(issueType, issueNumber, titleRegex, bodyRegex);
+        // result is false if issue/PR will be closed/warned, true if issue/PR is valid
+        let result = isValid;
+        if (isMatch === 'false') {
+            result = !isValid;
+        }
         (0, core_1.debug)(`result: ${result}`);
         if (result === true) {
             (0, core_1.setOutput)('result', 'true');
         }
         else {
-            if (isAutoClose === 'true') {
+            if (isAutoClose) {
                 (0, core_1.warning)(`Issue #${issueNumber} is not valid. Auto closing issue...`);
                 // Add comment
                 await octokit.rest.issues.createComment({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     issue_number: issueNumber,
-                    body: `Issue #${issueNumber} is not valid`,
+                    body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
                 });
                 // Close issue
                 await octokit.rest.issues.update({
@@ -30162,7 +30170,7 @@ async function run() {
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     issue_number: issueNumber,
-                    body: `Issue #${issueNumber} is not valid`,
+                    body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
                 });
             }
         }
