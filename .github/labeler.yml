@@ -1,17 +1,10 @@
 test:
-  - "src/*.test.ts"
-  - "src/**/*.test.ts"
-  - "src/*.spec.ts"
-  - "src/**/*.spec.ts"
+  - changed-files:
+    - any-glob-to-any-file:
+      - "src/**/*.test.ts"
+      - "src/*.spec.ts"
+      - "src/**/*.spec.ts"
 
 documentation:
-  - "**/*.md"
-  - "**/*.txt"
-
-dependencies:
-  - "**/package.json"
-  - "**/yarn.lock"
-
-infrastructure:
-  - "**/Dockerfile"
-  - "**/compose.yml"
+  - changed-files:
+    - any-glob-to-any-file: ["**/*.md", "**/*.txt"]
