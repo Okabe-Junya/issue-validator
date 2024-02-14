@@ -6,11 +6,11 @@ branding:
   color: 'gray-dark'
 inputs:
   title:
-    description: 'title for issue'
+    description: 'title for the issue/pull request'
     required: false
     default: ''
   body:
-    description: 'body for issue'
+    description: 'body for the issue/pull request'
     required: false
     default: ''
   title-regex-flags:
