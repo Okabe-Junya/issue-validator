@@ -32,6 +32,10 @@ inputs:
     description: 'auto close issue if it does not meet the conditions'
     required: false
     default: 'false'
+  is-match:
+    description: 'when you set "true", issue/pull request is warned/closed if it does not meet the conditions. when you set "false", issue/pull request is warned/closed if it meets the conditions'
+    required: false
+    default: 'false'
 outputs:
   result:
     description: 'result of validation'
