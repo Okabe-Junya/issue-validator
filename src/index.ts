@@ -14,6 +14,7 @@ export async function run() {
     const issueType = getInput('issue-type') || 'issue';
     const issueNumber = context.issue.number;
     const isAutoClose = getInput('is-auto-close') || 'false';
+    const isMatch = getInput('is-match') || 'false';
 
     debug(
       `inputs: ${JSON.stringify({
@@ -42,12 +43,20 @@ export async function run() {
 
     debug(`regex: ${JSON.stringify({ titleRegex, bodyRegex })}`);
 
-    const result = await validateIssueTitleAndBody(
+    // Validate issue title and body
+    // true if match, false if not match
+    const isValid = await validateIssueTitleAndBody(
       issueType,
       issueNumber,
       titleRegex,
       bodyRegex,
     );
+
+    // result is false if issue/PR will be closed/warned, true if issue/PR is valid
+    let result = isValid;
+    if (isMatch === 'false') {
+      result = !isValid;
+    }
 
     debug(`result: ${result}`);
 
@@ -61,7 +70,7 @@ export async function run() {
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid`,
+          body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
         });
 
         // Close issue
@@ -78,7 +87,7 @@ export async function run() {
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid`,
+          body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
         });
       }
     }
