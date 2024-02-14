@@ -82,7 +82,7 @@ export async function run() {
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
+          body: `Issue #${issueNumber} is not valid.`,
         });
       }
     }
