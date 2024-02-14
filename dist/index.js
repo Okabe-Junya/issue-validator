@@ -30170,7 +30170,7 @@ async function run() {
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     issue_number: issueNumber,
-                    body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
+                    body: `Issue #${issueNumber} is not valid.`,
                 });
             }
         }
