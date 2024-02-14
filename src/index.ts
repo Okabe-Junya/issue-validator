@@ -1,4 +1,11 @@
-import { getInput, setOutput, warning, setFailed, debug } from '@actions/core';
+import {
+  getInput,
+  getBooleanInput,
+  setOutput,
+  warning,
+  setFailed,
+  debug,
+} from '@actions/core';
 
 import { validateIssueTitleAndBody } from './validate';
 import { getOctokit, context } from '@actions/github';
@@ -6,14 +13,14 @@ import { getOctokit, context } from '@actions/github';
 export async function run() {
   try {
     const title = getInput('title') || '';
-    const titleRegexFlags = getInput('title-regex-flags' || '');
+    const titleRegexFlags = getBooleanInput('title-regex-flags');
     const body = getInput('body') || '';
-    const bodyRegexFlags = getInput('body-regex-flags') || '';
+    const bodyRegexFlags = getBooleanInput('body-regex-flags');
     const octokit = getOctokit(getInput('github-token', { required: true }));
 
     const issueType = getInput('issue-type') || 'issue';
     const issueNumber = context.issue.number;
-    const isAutoClose = getInput('is-auto-close') || 'false';
+    const isAutoClose = getBooleanInput('is-auto-close');
     const isMatch = getInput('is-match') || 'false';
 
     debug(
@@ -30,12 +37,12 @@ export async function run() {
 
     let titleRegex: RegExp | string | null;
     let bodyRegex: RegExp | string | null;
-    if (titleRegexFlags === 'true') {
+    if (titleRegexFlags) {
       titleRegex = new RegExp(title);
     } else {
       titleRegex = title;
     }
-    if (bodyRegexFlags === 'true') {
+    if (bodyRegexFlags) {
       bodyRegex = new RegExp(body);
     } else {
       bodyRegex = body;
@@ -63,7 +70,7 @@ export async function run() {
     if (result === true) {
       setOutput('result', 'true');
     } else {
-      if (isAutoClose === 'true') {
+      if (isAutoClose) {
         warning(`Issue #${issueNumber} is not valid. Auto closing issue...`);
         // Add comment
         await octokit.rest.issues.createComment({

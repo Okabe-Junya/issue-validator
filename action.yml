@@ -16,11 +16,11 @@ inputs:
   title-regex-flags:
     description: 'regex flags for title. if you want to use regex, you must set title and title-regex-flags: "true"'
     required: false
-    default: ''
+    default: 'false'
   body-regex-flags:
     description: 'regex flags for body. if you want to use regex, you must set body and body-regex-flags: "true"'
     required: false
-    default: ''
+    default: 'false'
   github-token:
     description: 'token for github'
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
