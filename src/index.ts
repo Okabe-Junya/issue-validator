@@ -1,11 +1,4 @@
-import {
-  getInput,
-  getBooleanInput,
-  setOutput,
-  warning,
-  setFailed,
-  debug,
-} from '@actions/core';
+import { getInput, getBooleanInput, setOutput, warning, setFailed, debug } from '@actions/core';
 
 import { validateIssueTitleAndBody } from './validate';
 import { getOctokit, context } from '@actions/github';
@@ -52,12 +45,7 @@ export async function run() {
 
     // Validate issue title and body
     // true if match, false if not match
-    const isValid = await validateIssueTitleAndBody(
-      issueType,
-      issueNumber,
-      titleRegex,
-      bodyRegex,
-    );
+    const isValid = await validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bodyRegex);
 
     // result is false if issue/PR will be closed/warned, true if issue/PR is valid
     let result = isValid;
