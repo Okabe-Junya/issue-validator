@@ -22,7 +22,7 @@
     "@babel/preset-typescript": "^7.22.15",
     "@types/jest": "^29.5.5",
     "@vercel/ncc": "^0.38.0",
-    "eslint": "^8.50.0",
+    "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin": "^1.0.1",
     "eslint-plugin-deprecation": "^2.0.0",
