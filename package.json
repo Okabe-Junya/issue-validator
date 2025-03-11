@@ -27,7 +27,8 @@
     "jest": "^29.7.0",
     "jest-failure-reporter": "^1.0.1",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "@jest/globals": "^29.7.0"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
