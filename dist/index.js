@@ -30049,7 +30049,7 @@ exports.getPullRequestLabels = getPullRequestLabels;
 const core = __importStar(__nccwpck_require__(9999));
 const github = __importStar(__nccwpck_require__(2819));
 async function getIssueTitleAndBody(issueNumber) {
-    const octokit = github.getOctokit(core.getInput("github-token"));
+    const octokit = github.getOctokit(core.getInput("github-token", { required: true }));
     const { data: issue } = await octokit.rest.issues.get({
         ...github.context.repo,
         issue_number: issueNumber,
@@ -30060,7 +30060,7 @@ async function getIssueTitleAndBody(issueNumber) {
     };
 }
 async function getPullRequestTitleAndBody(prNumber) {
-    const octokit = github.getOctokit(core.getInput("github-token"));
+    const octokit = github.getOctokit(core.getInput("github-token", { required: true }));
     const { data: pr } = await octokit.rest.pulls.get({
         ...github.context.repo,
         pull_number: prNumber,
@@ -30071,7 +30071,7 @@ async function getPullRequestTitleAndBody(prNumber) {
     };
 }
 async function getIssueLabels(issueNumber) {
-    const octokit = github.getOctokit(core.getInput("github-token"));
+    const octokit = github.getOctokit(core.getInput("github-token", { required: true }));
     const { data: issue } = await octokit.rest.issues.get({
         ...github.context.repo,
         issue_number: issueNumber,
@@ -30079,7 +30079,7 @@ async function getIssueLabels(issueNumber) {
     return issue.labels.map((label) => typeof label === "string" ? label : label.name);
 }
 async function getPullRequestLabels(prNumber) {
-    const octokit = github.getOctokit(core.getInput("github-token"));
+    const octokit = github.getOctokit(core.getInput("github-token", { required: true }));
     const { data: pr } = await octokit.rest.pulls.get({
         ...github.context.repo,
         pull_number: prNumber,
