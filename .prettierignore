@@ -1,5 +1,0 @@
-# Ignore everything in the root except some files
-/*
-
-# Unignore all files in the src directory
-!src/

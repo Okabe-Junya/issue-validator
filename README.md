@@ -19,6 +19,9 @@ This is a simple issue validator github action that checks if the issue/pr title
 | `issue-type`        | Validate for issue or pull request. Default is `"issue"`.                                                                                  | No       | `'issue'`     |
 | `is-auto-close`     | Auto close issue if not meeting conditions.                                                                                                | No       | `'false'`     |
 | `is-match`          | If set to `"true"`, the title and body must match the condition. If set to `"false"`, the title and body must **not** match the condition. | No       | `'true'`      |
+| `github-token`      | GitHub token for authentication. Required for auto-closing issues.                                                                          | Yes      | N/A           |
+| `required-labels`   | Comma-separated list of required labels. The issue/PR must have all these labels to pass validation.                                        | No       | `''`          |
+| `forbidden-labels`  | Comma-separated list of forbidden labels. The issue/PR must not have any of these labels to pass validation.                                | No       | `''`          |
 
 ### Outputs
 
@@ -36,17 +39,20 @@ document: [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript
 
 ## Example
 
-When created a new issue/pr with the title starting with `SPAM`, the issue/pr will be closed automatically.
+When created a new issue/pr with the title starting with `SPAM`, or with a `wip` label, the issue/pr will be closed automatically.
 
 ```yaml
 name: issue validator
 on:
   workflow_dispatch:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, labeled, unlabeled]
+  pull_request:
+    types: [opened, edited, labeled, unlabeled]
 
 permissions:
   issues: write
+  pull_requests: write
 
 jobs:
   validate:
@@ -59,6 +65,20 @@ jobs:
           is-auto-close: 'true'
           issue-type: 'both'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          forbidden-labels: 'wip'
+```
+
+### Label Validation
+
+You can use `required-labels` and `forbidden-labels` to validate the labels on issues and pull requests. For example:
+
+```yaml
+- uses: Okabe-Junya/issue-validator@latest
+  with:
+    required-labels: 'bug,priority'  # Issue/PR must have both 'bug' and 'priority' labels
+    forbidden-labels: 'wip,invalid'  # Issue/PR must not have 'wip' or 'invalid' labels
+    is-auto-close: 'true'
+    github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## License
