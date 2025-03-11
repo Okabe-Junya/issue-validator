@@ -1,9 +1,5 @@
-name: 'issue-validator'
-description: 'auto close issue if it does not meet the conditions'
-author: 'Okabe-Junya'
-branding:
-  icon: 'alert-triangle'
-  color: 'gray-dark'
+name: 'Issue Validator'
+description: 'Validate issue/pr title and body'
 inputs:
   title:
     description: 'title for the issue/pull request'
@@ -28,14 +24,14 @@ inputs:
     description: 'validate for issue or pull request. if you want to validate pull request, you must set issue-type: "pull_request". Both issue and pull request are validated, if you set issue-type: "both". default is "issue"'
     required: false
     default: 'issue'
-  is-auto-close:
-    description: 'auto close issue if it does not meet the conditions'
+  required-labels:
+    description: 'Comma-separated list of required labels'
     required: false
-    default: 'false'
-  is-match:
-    description: 'when you set "true", issue/pull request is warned/closed if it does not meet the conditions. when you set "false", issue/pull request is warned/closed if it meets the conditions'
+    default: ''
+  forbidden-labels:
+    description: 'Comma-separated list of forbidden labels'
     required: false
-    default: 'false'
+    default: ''
 outputs:
   result:
     description: 'result of validation'

@@ -1,32 +1,54 @@
-import { getInput } from '@actions/core';
-import { getOctokit, context } from '@actions/github';
+import * as core from "@actions/core"
+import * as github from "@actions/github"
 
-export async function getIssueTitleAndBody(issueNumber: number): Promise<{ title: string; body: string }> {
-  const token = getInput('github-token', { required: true });
-  const octokit = getOctokit(token);
+export async function getIssueTitleAndBody(
+  issueNumber: number,
+): Promise<{ title: string; body: string }> {
+  const octokit = github.getOctokit(core.getInput("github-token", { required: true }))
   const { data: issue } = await octokit.rest.issues.get({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
+    ...github.context.repo,
     issue_number: issueNumber,
-  });
-  issue.body = issue.body || '';
+  })
   return {
     title: issue.title,
-    body: issue.body,
-  };
+    body: issue.body || "",
+  }
 }
 
-export async function getPullRequestTitleAndBody(pullNumber: number): Promise<{ title: string; body: string }> {
-  const token = getInput('github-token', { required: true });
-  const octokit = getOctokit(token);
-  const { data: pullRequest } = await octokit.rest.pulls.get({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    pull_number: pullNumber,
-  });
-  pullRequest.body = pullRequest.body || '';
+export async function getPullRequestTitleAndBody(
+  prNumber: number,
+): Promise<{ title: string; body: string }> {
+  const octokit = github.getOctokit(core.getInput("github-token", { required: true }))
+  const { data: pr } = await octokit.rest.pulls.get({
+    ...github.context.repo,
+    pull_number: prNumber,
+  })
   return {
-    title: pullRequest.title,
-    body: pullRequest.body,
-  };
+    title: pr.title,
+    body: pr.body || "",
+  }
+}
+
+export async function getIssueLabels(issueNumber: number): Promise<string[]> {
+  const octokit = github.getOctokit(core.getInput("github-token", { required: true }))
+  const { data: issue } = await octokit.rest.issues.get({
+    ...github.context.repo,
+    issue_number: issueNumber,
+  })
+  return issue.labels.map((label: any) =>
+    typeof label === "string" ? label : label.name,
+  )
+}
+
+export async function getPullRequestLabels(
+  prNumber: number,
+): Promise<string[]> {
+  const octokit = github.getOctokit(core.getInput("github-token", { required: true }))
+  const { data: pr } = await octokit.rest.pulls.get({
+    ...github.context.repo,
+    pull_number: prNumber,
+  })
+  return pr.labels.map((label: any) =>
+    typeof label === "string" ? label : label.name,
+  )
 }

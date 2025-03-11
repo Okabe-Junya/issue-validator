@@ -1,95 +1,60 @@
-import { getInput, getBooleanInput, setOutput, warning, setFailed, debug } from '@actions/core';
+import * as core from "@actions/core"
+import * as github from "@actions/github"
+import { validateIssueTitleAndBody } from "./validate"
 
-import { validateIssueTitleAndBody } from './validate';
-import { getOctokit, context } from '@actions/github';
-
-export async function run() {
+async function run(): Promise<void> {
   try {
-    const title = getInput('title') || '';
-    const titleRegexFlags = getBooleanInput('title-regex-flags');
-    const body = getInput('body') || '';
-    const bodyRegexFlags = getBooleanInput('body-regex-flags');
-    const octokit = getOctokit(getInput('github-token', { required: true }));
+    const title = core.getInput("title")
+    const body = core.getInput("body")
+    const titleRegexFlag = core.getInput("title-regex-flags") === "true"
+    const bodyRegexFlag = core.getInput("body-regex-flags") === "true"
+    const issueType = core.getInput("issue-type")
+    const isAutoClose = core.getInput("is-auto-close") === "true"
+    const isMatch = core.getInput("is-match") === "true"
+    const requiredLabels = core
+      .getInput("required-labels")
+      .split(",")
+      .filter(Boolean)
+    const forbiddenLabels = core
+      .getInput("forbidden-labels")
+      .split(",")
+      .filter(Boolean)
 
-    const issueType = getInput('issue-type') || 'issue';
-    const issueNumber = context.issue.number;
-    const isAutoClose = getBooleanInput('is-auto-close');
-    const isMatch = getInput('is-match') || 'false';
+    const titleRegex = titleRegexFlag ? new RegExp(title) : title || null
+    const bodyRegex = bodyRegexFlag ? new RegExp(body) : body || null
 
-    debug(
-      `inputs: ${JSON.stringify({
-        title,
-        titleRegexFlags,
-        body,
-        bodyRegexFlags,
-        issueType,
-        issueNumber,
-        isAutoClose,
-      })}`,
-    );
-
-    let titleRegex: RegExp | string | null;
-    let bodyRegex: RegExp | string | null;
-    if (titleRegexFlags) {
-      titleRegex = new RegExp(title);
-    } else {
-      titleRegex = title;
-    }
-    if (bodyRegexFlags) {
-      bodyRegex = new RegExp(body);
-    } else {
-      bodyRegex = body;
+    const issueNumber =
+      github.context.payload.issue?.number ||
+      github.context.payload.pull_request?.number
+    if (!issueNumber) {
+      throw new Error("No issue or pull request number found")
     }
 
-    debug(`regex: ${JSON.stringify({ titleRegex, bodyRegex })}`);
+    const result = await validateIssueTitleAndBody(
+      issueType,
+      issueNumber,
+      titleRegex,
+      bodyRegex,
+      requiredLabels,
+      forbiddenLabels,
+    )
 
-    // Validate issue title and body
-    // true if match, false if not match
-    const isValid = await validateIssueTitleAndBody(issueType, issueNumber, titleRegex, bodyRegex);
+    const finalResult = isMatch ? result : !result
+    core.setOutput("result", finalResult.toString())
 
-    // result is false if issue/PR will be closed/warned, true if issue/PR is valid
-    let result = isValid;
-    if (isMatch === 'false') {
-      result = !isValid;
+    if (!finalResult && isAutoClose) {
+      const octokit = github.getOctokit(core.getInput("github-token"))
+      await octokit.rest.issues.update({
+        ...github.context.repo,
+        issue_number: issueNumber,
+        state: "closed",
+      })
     }
-
-    debug(`result: ${result}`);
-
-    if (result === true) {
-      setOutput('result', 'true');
-    } else {
-      if (isAutoClose) {
-        warning(`Issue #${issueNumber} is not valid. Auto closing issue...`);
-        // Add comment
-        await octokit.rest.issues.createComment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid. Auto closing issue...`,
-        });
-
-        // Close issue
-        await octokit.rest.issues.update({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issueNumber,
-          state: 'closed',
-        });
-      } else {
-        warning(`Issue #${issueNumber} is not valid.`);
-        // Add comment
-        await octokit.rest.issues.createComment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issueNumber,
-          body: `Issue #${issueNumber} is not valid.`,
-        });
-      }
+  } catch (error) {
+    if (error instanceof Error) {
+      core.setFailed(error.message)
     }
-    /* eslint @typescript-eslint/no-explicit-any: 0,  @typescript-eslint/no-unsafe-argument: 0, @typescript-eslint/no-unsafe-member-access: 0, @typescript-eslint/no-floating-promises: 0 */
-  } catch (error: any) {
-    setFailed(error.message);
   }
 }
 
-run();
+run()
