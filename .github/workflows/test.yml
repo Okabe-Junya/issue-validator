@@ -18,6 +18,9 @@ jobs:
         with:
           node-version-file: .node-version
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Install Dependencies with pnpm
         run: pnpm install
 
@@ -26,6 +29,7 @@ jobs:
         with:
           path: node/ci-dependency/node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('pnpm-lock.yaml') }}
+
   test:
     needs: setup
     runs-on: ${{ matrix.os }}
