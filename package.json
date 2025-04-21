@@ -2,7 +2,7 @@
   "name": "issue-validator",
   "version": "0.2.5",
   "main": "dist/index.js",
-  "packageManager": "pnpm@10.8.1",
+  "packageManager": "pnpm@10.9.0",
   "scripts": {
     "build": "ncc build -o dist src/index.ts --license licenses.txt",
     "build:dry-run": "ncc build -o dist src/index.ts --license licenses.txt --no-cache",
